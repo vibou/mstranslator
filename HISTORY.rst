@@ -1,5 +1,10 @@
 History
 -------
+0.3.3 (2017-04-13)
+++++++++++++++++++
+
+- Add timeout on get request. See https://github.com/wronglink/mstranslator/issues/20
+
 0.3.2 (2016-12-08)
 ++++++++++++++++++
 
