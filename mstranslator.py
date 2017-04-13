@@ -9,6 +9,9 @@ except NameError:
     basestring = (str, bytes)
 
 
+MSTRANSLATOR_TIMEOUT = 30
+
+
 class AccessError(Exception):
     def __init__(self, response):
         self.status_code = response.status_code
@@ -30,7 +33,8 @@ class TranslateApiException(Exception):
 
 class AccessToken(object):
     access_url = "https://api.cognitive.microsoft.com/sts/v1.0/issueToken"
-    expire_delta = datetime.timedelta(minutes=9)  # Translator API valid for 10 minutes, actually
+    # Translator API valid for 10 minutes, actually
+    expire_delta = datetime.timedelta(minutes=9)
 
     def __init__(self, subscription_key):
         self.subscription_key = subscription_key
@@ -74,7 +78,8 @@ class Translator(object):
 
     def make_request(self, action, params=None):
         url = self.make_url(action)
-        resp = requests.get(url, auth=self.auth, params=params)
+        resp = requests.get(url, auth=self.auth, params=params,
+                            timeout=MSTRANSLATOR_TIMEOUT)
         return self.make_response(resp)
 
     def make_response(self, resp):
@@ -123,7 +128,7 @@ class Translator(object):
                                contenttype, category)
 
     def translate_array2(self, texts=[], lang_from=None, lang_to=None,
-                        contenttype='text/plain', category='general'):
+                         contenttype='text/plain', category='general'):
         params = {
             'texts': json.dumps(texts),
         }
@@ -164,20 +169,23 @@ class Translator(object):
         c = 0
         result = []
         for i in lengths:
-            result.append(text[c:c+i])
+            result.append(text[c:c + i])
             c += i
         return result
 
     def add_translation(self, text_orig, text_trans, lang_from, lang_to, user, rating=1,
                         contenttype='text/plain', category='general', url=None):
         if len(text_orig) > 1000:
-            raise ValueError('The original text maximum length is 1000 characters')
+            raise ValueError(
+                'The original text maximum length is 1000 characters')
         if len(text_trans) > 2000:
-            raise ValueError('The translated text maximum length is 1000 characters')
+            raise ValueError(
+                'The translated text maximum length is 1000 characters')
         if contenttype not in ('text/plain', 'text/html'):
             raise ValueError('Invalid contenttype value')
         if not -10 < rating < 10 or not isinstance(rating, int):
-            raise ValueError('Raiting must be an integer value between -10 and 10')
+            raise ValueError(
+                'Raiting must be an integer value between -10 and 10')
         params = {
             'originalText': text_orig,
             'translatedText': text_trans,
